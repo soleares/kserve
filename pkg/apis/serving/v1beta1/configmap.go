@@ -20,7 +20,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
 	"github.com/kserve/kserve/pkg/constants"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -37,6 +36,8 @@ const (
 const (
 	IngressConfigKeyName = "ingress"
 	DeployConfigName     = "deploy"
+
+	DefaultLocalGatewayPort = constants.CommonDefaultHttpPort
 
 	DefaultDomainTemplate = "{{ .Name }}-{{ .Namespace }}.{{ .IngressDomain }}"
 	DefaultIngressDomain  = "example.com"
@@ -123,6 +124,7 @@ type IngressConfig struct {
 	IngressServiceName      string  `json:"ingressService,omitempty"`
 	LocalGateway            string  `json:"localGateway,omitempty"`
 	LocalGatewayServiceName string  `json:"localGatewayService,omitempty"`
+	LocalGatewayPort        int     `json:"localGatewayPort,omitempty"`
 	IngressDomain           string  `json:"ingressDomain,omitempty"`
 	IngressClassName        *string `json:"ingressClassName,omitempty"`
 	DomainTemplate          string  `json:"domainTemplate,omitempty"`
@@ -169,6 +171,10 @@ func NewIngressConfig(cli client.Client) (*IngressConfig, error) {
 		if ingressConfig.IngressGateway == "" || ingressConfig.IngressServiceName == "" {
 			return nil, fmt.Errorf("Invalid ingress config, ingressGateway, ingressService are required.")
 		}
+	}
+
+	if ingressConfig.LocalGatewayPort == 0 {
+		ingressConfig.LocalGatewayPort = DefaultLocalGatewayPort
 	}
 
 	if ingressConfig.DomainTemplate == "" {

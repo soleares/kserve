@@ -167,12 +167,12 @@ func (r *IngressReconciler) reconcileExternalService(isvc *v1beta1.InferenceServ
 	return nil
 }
 
-func createHTTPRouteDestination(targetHost, namespace string, gatewayService string) *istiov1alpha3.HTTPRouteDestination {
+func createHTTPRouteDestination(targetHost, namespace string, gatewayService string, gatewayPort int) *istiov1alpha3.HTTPRouteDestination {
 	httpRouteDestination := &istiov1alpha3.HTTPRouteDestination{
 		Destination: &istiov1alpha3.Destination{
 			Host: gatewayService,
 			Port: &istiov1alpha3.PortSelector{
-				Number: constants.CommonDefaultHttpPort,
+				Number: uint32(gatewayPort),
 			},
 		},
 		Weight: 100,
@@ -266,7 +266,7 @@ func createIngress(isvc *v1beta1.InferenceService, config *v1beta1.IngressConfig
 			Match: createHTTPMatchRequest(constants.ExplainPrefix(), serviceHost,
 				network.GetServiceHostname(isvc.Name, isvc.Namespace), isInternal, config),
 			Route: []*istiov1alpha3.HTTPRouteDestination{
-				createHTTPRouteDestination(constants.DefaultExplainerServiceName(isvc.Name), isvc.Namespace, config.LocalGatewayServiceName),
+				createHTTPRouteDestination(constants.DefaultExplainerServiceName(isvc.Name), isvc.Namespace, config.LocalGatewayServiceName, config.LocalGatewayPort),
 			},
 			Headers: &istiov1alpha3.Headers{
 				Request: &istiov1alpha3.Headers_HeaderOperations{
@@ -283,7 +283,7 @@ func createIngress(isvc *v1beta1.InferenceService, config *v1beta1.IngressConfig
 		Match: createHTTPMatchRequest("", serviceHost,
 			network.GetServiceHostname(isvc.Name, isvc.Namespace), isInternal, config),
 		Route: []*istiov1alpha3.HTTPRouteDestination{
-			createHTTPRouteDestination(backend, isvc.Namespace, config.LocalGatewayServiceName),
+			createHTTPRouteDestination(backend, isvc.Namespace, config.LocalGatewayServiceName, config.LocalGatewayPort),
 		},
 		Headers: &istiov1alpha3.Headers{
 			Request: &istiov1alpha3.Headers_HeaderOperations{

@@ -489,6 +489,7 @@ func TestCreateVirtualService(t *testing.T) {
 				IngressServiceName:      "someIngressServiceName",
 				LocalGateway:            constants.KnativeLocalGateway,
 				LocalGatewayServiceName: "knative-local-gateway.istio-system.svc.cluster.local",
+				LocalGatewayPort:        constants.CommonDefaultHttpPort,
 			}
 
 			actualService := createIngress(testIsvc, ingressConfig)
